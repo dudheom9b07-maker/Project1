@@ -7,10 +7,17 @@ function Login({ onLogin }) {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    email === "admin@gmail.com" && password === "123456" ? onLogin()
-    : setError("Invalid email or password");
-    };
-
+    const storedUserData = JSON.parse(localStorage.getItem("userData"));
+    if (!storedUserData) {
+      setError("No user found with this email.");
+      return;
+    }
+    if (storedUserData.email === email && password === storedUserData.password) {
+      onLogin(storedUserData);
+    } else {
+      setError("Invalid email or password.");
+    }
+  };
     return (
         <div style={{ maxWidth: "400px", margin: "0 auto", padding: "20px", }}>
         <h2>Login</h2>

@@ -1,96 +1,82 @@
 import { useState } from "react";
 
-const Register = () => {
-  const [formData, setFormData] = useState({
-    name: "",
-    email: "",
-    password: "",
-    confirmPassword: "",
-  });
-
-  const handleChange = (e) => {
-    setFormData({
-      ...formData,
-      [e.target.name]: e.target.value,
-    });
-  };
+function Registration({onRegisterSuccesful}) {
+  const [name, setName] = useState("");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [message, setMessage] = useState("");
 
   const handleSubmit = (e) => {
     e.preventDefault();
 
-    if (formData.password !== formData.confirmPassword) {
-      alert("Passwords do not match");
+    if (!name || !email || !password) {
+      setMessage("All fields are required");
       return;
     }
 
-    console.log("Registered User:", formData);
-    // Send data to backend API here
-  };
+    //Storing data locally here
+    const userData = {
+      name,
+      email,
+      password,
+     };
+
+     localStorage.setItem("userData", JSON.stringify(userData));
+    // for now just showing success
+    setMessage("Registration successful ✅");
+
+    // clear form
+    setName("om");
+    setEmail("admin@gmail.com");
+    setPassword("123456");
+  
+
+  setTimeout(() => {
+  onRegisterSuccesful();  
+  },2000);
+};
+
+
+
 
   return (
-    <div style={styles.container}>
-      <form onSubmit={handleSubmit} style={styles.form}>
-        <h2>Register</h2>
+    <div style={{ width: "300px", margin: "50px auto" }}>
+      <h2>Register</h2>
 
-        <input
-          type="text"
-          name="name"
-          placeholder="Full Name"
-          value={formData.name}
-          onChange={handleChange}
-          required
-        />
+      {message && <p>{message}</p>}
 
-        <input
-          type="email"
-          name="email"
-          placeholder="Email"
-          value={formData.email}
-          onChange={handleChange}
-          required
-        />
+      <form onSubmit={handleSubmit}>
+        <div>
+          <input
+            type="text"
+            placeholder="Enter name"
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+          />
+        </div>
 
-        <input
-          type="password"
-          name="password"
-          placeholder="Password"
-          value={formData.password}
-          onChange={handleChange}
-          required
-        />
+        <div>
+          <input
+            type="email"
+            placeholder="Enter email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+          />
+        </div>
 
-        <input
-          type="password"
-          name="confirmPassword"
-          placeholder="Confirm Password"
-          value={formData.confirmPassword}
-          onChange={handleChange}
-          required
-        />
+        <div>
+          <input
+            type="password"
+            placeholder="Enter password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+          />
+        </div>
 
         <button type="submit">Register</button>
       </form>
     </div>
   );
-};
+}
 
-const styles = {
-  container: {
-    display: "flex",
-    justifyContent: "center",
-    alignItems: "center",
-    height: "100vh",
-    background: "#f4f4f4",
-  },
-  form: {
-    background: "#fff",
-    padding: "2rem",
-    borderRadius: "8px",
-    width: "300px",
-    display: "flex",
-    flexDirection: "column",
-    gap: "10px",
-  },
-};
-
-export default Register;
+export default Registration;
