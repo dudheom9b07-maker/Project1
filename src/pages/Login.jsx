@@ -4,18 +4,39 @@ function Login({ onLogin }) {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    const storedUserData = JSON.parse(localStorage.getItem("userData"));
-    if (!storedUserData) {
-      setError("No user found with this email.");
+
+    if (!email || !password) {
+      setError("Please provide email and password");
       return;
     }
-    if (storedUserData.email === email && password === storedUserData.password) {
-      onLogin(storedUserData);
-    } else {
-      setError("Invalid email or password.");
+
+    try {
+      setLoading(true);
+      setError("");
+      const res = await fetch("http://localhost:5000/api/auth/login", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ email, password }),
+      });
+      const data = await res.json();
+      if (res.ok) {
+        // Store user data in localStorage for session
+        localStorage.setItem("user", JSON.stringify({ ...data.user, isLoggedIn: true }));
+        onLogin(data.user);
+      } else {
+        setError(data.message || "Login failed");
+      }
+    } catch (err) {
+      console.error(err);
+      setError("Server error");
+    } finally {
+      setLoading(false);
     }
   };
     return (
@@ -37,7 +58,9 @@ function Login({ onLogin }) {
             required
           />
 
-          <button type="submit">Login</button>
+          <button type="submit" disabled={loading}>
+            {loading ? "Logging in..." : "Login"}
+          </button>
           </form>
             {error && <p style={{ color: "red" }}>{error}</p>}
             </div>

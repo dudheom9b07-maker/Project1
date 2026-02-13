@@ -5,8 +5,9 @@ function Registration({onRegisterSuccesful}) {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [message, setMessage] = useState("");
+  const [loading, setLoading] = useState(false);
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async(e) => {
     e.preventDefault();
 
     if (!name || !email || !password) {
@@ -14,27 +15,37 @@ function Registration({onRegisterSuccesful}) {
       return;
     }
 
-    //Storing data locally here
-    const userData = {
-      name,
-      email,
-      password,
-     };
-
-     localStorage.setItem("userData", JSON.stringify(userData));
-    // for now just showing success
-    setMessage("Registration successful ✅");
-
-    // clear form
-    setName("om");
-    setEmail("admin@gmail.com");
-    setPassword("123456");
-  
-
-  setTimeout(() => {
-  onRegisterSuccesful();  
-  },2000);
-};
+    try {
+      setLoading(true);
+      setMessage("");
+      const res = await fetch("http://localhost:5000/api/auth/register", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ name, email, password }),
+      });
+      const data = await res.json();
+      if (res.ok) {
+        setMessage("Registration Successful!");
+        // clear form
+        setName("");
+        setEmail("");
+        setPassword("");
+        setLoading(false);
+        setTimeout(() => {
+          onRegisterSuccesful();
+        }, 2000);
+      } else {
+        setMessage(data.message || "Registration failed");
+        setLoading(false);
+      }
+  } catch (err) {
+    console.error(err);
+    setMessage("Server error");
+    setLoading(false);
+  }
+  };
 
 
 
@@ -73,7 +84,8 @@ function Registration({onRegisterSuccesful}) {
           />
         </div>
 
-        <button type="submit">Register</button>
+        <button type="submit" disabled={loading}>
+          {loading ? "Registering..." : "Register"}</button>
       </form>
     </div>
   );
